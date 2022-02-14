@@ -60,20 +60,19 @@ exports.buscarPlaylist = async(temperatura)=>{
     
     const musicas =  tracks.data.items.map(item=>{return item.track.name})
     
-    return{status:'OK',musicas:musicas}
+    return{status:'OK',genero:genero,musicas:musicas}
 }
 
 
 exports.buscarPorCidade = async (req,res)=>{
     const cidade = req.params.cidade
+    //Buscando coordenadas por cidade
     const coordenadas = await axios.get(`http://api.openweathermap.org/geo/1.0/direct?q=${cidade},BR&limit=1&appid=b77e07f479efe92156376a8b07640ced`)
-    
 
     if (coordenadas.data.length >0) {
         const lat = coordenadas.data[0].lat
         const lon = coordenadas.data[0].lon
         
-        //res.send(coordenadas.data)
         req.params={lat:lat,lon:lon}
         this.buscarPorCoordenadas(req,res)        
     } else {
@@ -86,16 +85,16 @@ exports.buscarPorCoordenadas = async (req,res)=>{
     
     let lat = req.params.lat
     let lon = req.params.lon
-    //Buscando Tempereatura por coordenadas
+    //Buscando Temperatura por coordenadas
     axios.get(`http://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=b77e07f479efe92156376a8b07640ced&units=metric`)
     .then(resultado =>{
 
-        this.buscarPlaylist(data.main.temp).then(result=>{
+        this.buscarPlaylist(resultado.data.main.temp).then(result=>{
             res.status(200).send(result)
         })
     
     }).catch(err=>{
-
+        console.log(err);
         res.send({status:'NOK',message:'Latitude e/ou Longitude incorretas.'})
     })
    
